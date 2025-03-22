@@ -21,6 +21,8 @@ async fn main() -> std::io::Result<()> {
             .service(api::sync)
             .service(api::rooms)
             .service(api::room_messages)
+            .service(api::join_room)
+            .service(api::leave_room)
             .service(api::send_message)
     })
     .bind("127.0.0.1:8080")?

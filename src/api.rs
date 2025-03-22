@@ -278,6 +278,85 @@ pub async fn room_messages(
     }
 }
 
+#[post("/rooms/{session_id}/{room_id}/join")]
+pub async fn join_room(
+    state: web::Data<ApiState>,
+    path: web::Path<(String, String)>,
+) -> Result<impl Responder, ApiError> {
+    let (session_id, room_id_str) = path.into_inner();
+    let sessions = state.sessions.read().await;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
+    let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
+    
+    let room_id = OwnedRoomId::try_from(room_id_str.clone())
+        .map_err(|_| ApiError::MatrixError("Invalid room ID format".to_string()))?;
+    
+    // Set a tokio timeout to ensure we don't hang for too long
+    let join_future = client.join_room_by_id(&room_id);
+    let join_result = tokio::time::timeout(
+        std::time::Duration::from_secs(10),
+        join_future
+    ).await;
+    
+    match join_result {
+        Ok(Ok(room)) => {
+            Ok(HttpResponse::Ok().json(json!({
+                "status": "success",
+                "room_id": room.room_id().to_string(),
+                "message": format!("Successfully joined room {}", room_id_str)
+            })))
+        },
+        Ok(Err(e)) => {
+            Err(ApiError::MatrixError(format!("Failed to join room: {}", e)))
+        },
+        Err(_) => {
+            Err(ApiError::MatrixError("Request to join room timed out".to_string()))
+        }
+    }
+}
+
+#[post("/rooms/{session_id}/{room_id}/leave")]
+pub async fn leave_room(
+    state: web::Data<ApiState>,
+    path: web::Path<(String, String)>,
+) -> Result<impl Responder, ApiError> {
+    let (session_id, room_id_str) = path.into_inner();
+    let sessions = state.sessions.read().await;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
+    let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
+    
+    let room_id = OwnedRoomId::try_from(room_id_str.clone())
+        .map_err(|_| ApiError::MatrixError("Invalid room ID format".to_string()))?;
+    
+    // Get the room first
+    let room = client
+        .get_room(&room_id)
+        .ok_or(ApiError::MatrixError(format!("Room {} not found", room_id_str)))?;
+    
+    // Set a tokio timeout to ensure we don't hang for too long
+    let leave_future = room.leave();
+    let leave_result = tokio::time::timeout(
+        std::time::Duration::from_secs(10),
+        leave_future
+    ).await;
+    
+    match leave_result {
+        Ok(Ok(_)) => {
+            Ok(HttpResponse::Ok().json(json!({
+                "status": "success",
+                "room_id": room_id.to_string(),
+                "message": format!("Successfully left room {}", room_id_str)
+            })))
+        },
+        Ok(Err(e)) => {
+            Err(ApiError::MatrixError(format!("Failed to leave room: {}", e)))
+        },
+        Err(_) => {
+            Err(ApiError::MatrixError("Request to leave room timed out".to_string()))
+        }
+    }
+}
+
 #[post("/rooms/{session_id}/{room_id}/send")]
 pub async fn send_message(
     state: web::Data<ApiState>,
