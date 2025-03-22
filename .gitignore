@@ -1,0 +1,10 @@
+/target
+sqlite3.dll
+Cargo.lock
+examples/ex1/.env
+examples/ex1/.venv/
+examples/ex1/uv.lock
+examples/ex1/src/ex1/tools/matrixtool/__pycache__
+examples/ex1/src/ex1/__pycache__
+.env
+

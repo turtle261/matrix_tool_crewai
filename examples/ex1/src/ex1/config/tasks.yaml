@@ -1,0 +1,36 @@
+explore_rooms_task:
+  description: >
+    Find out how many rooms the user is in on Matrix and list them.
+    Use the MatrixTool with task set to exactly "list_rooms" or "count_rooms".
+    Example: {"task": "list_rooms"}
+    Report your findings in the exact format: "There are X rooms" followed by a list of room IDs and names if any.
+  expected_output: >
+    A clear statement of the number of rooms with the format "There are X rooms" followed by 
+    room details if any rooms exist.
+  agent: matrix_agent
+
+analyze_messages_task:
+  description: >
+    Analyze the messages in each room to determine the general theme.
+    First list all rooms using "list_rooms", then examine message content in promising rooms 
+    using "get_messages [room_id]" to understand the conversation topics.
+    Example: {"task": "get_messages !roomId123:example.com"}
+    After reviewing messages from several rooms, determine common themes 
+    and report your findings in the exact format: "The room(s) are about [5-word theme]"
+  expected_output: >
+    A clear statement about room themes with the format "The room(s) are about [theme]", 
+    with each theme described in exactly 5 words.
+  agent: matrix_agent
+
+send_message_task:
+  description: >
+    Send a message saying 'Hi from CrewAI!' to one appropriate room.
+    Choose the room based on the analysis from the previous task.
+    Use the MatrixTool with task set to "send_message [room_id] Hi from CrewAI!"
+    Example: {"task": "send_message !roomId123:example.com Hi from CrewAI!"}
+    If sending fails in one room, try another until successful.
+    Report your action in the exact format: "I sent the message 'Hi from CrewAI!' to [room_id], which is about [theme]"
+  expected_output: >
+    A clear confirmation of the message delivery with the format 
+    "I sent the message 'Hi from CrewAI!' to [room_id], which is about [theme]"
+  agent: matrix_agent
