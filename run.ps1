@@ -16,6 +16,8 @@ if (-not (Test-Path ".env")) {
 # Copy .env to the examples/ex1 directory
 Write-Host "Copying .env file to examples/ex1" -ForegroundColor Yellow
 Copy-Item ".env" -Destination "examples/ex1/" -Force
+Write-Host "Copying matrix_tool.py file to examples/ex1/src/ex1/tools/" -ForegroundColor Yellow
+Copy-Item "matrix_tool.py" -Destination "examples/ex1/src/ex1/tools" -Force
 
 # Start the API server in a background job
 Write-Host "Starting Matrix API server..." -ForegroundColor Green
