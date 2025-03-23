@@ -14,14 +14,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(actix_web::web::Data::new(state.clone()))
-            .service(api::status)
-            .service(api::login_sso_start)
-            .service(api::login_sso_callback)
-            .service(api::login_status)
-            .service(api::sync)
-            .service(api::rooms)
-            .service(api::room_messages)
-            .service(api::send_message)
+            .configure(api::config)
     })
     .bind("127.0.0.1:8080")?
     .run()
