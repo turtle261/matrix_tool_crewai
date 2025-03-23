@@ -115,6 +115,8 @@ cargo test
 ./run.ps1 #(or crewai run in example dir) 
 
 ```
+For reference: `run.ps1` will run the crewai example agent, which performs simple tasks on matrix. 
+`cargo test` will run the API backend tests, to ensure that the agent tool will not have backend issues. 
 
 ---
 
