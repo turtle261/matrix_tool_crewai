@@ -76,7 +76,7 @@ The Matrix tool supports the following operations:
 
 Check out the [examples](./examples) directory for complete working examples:
 
-- [Ex1](./examples/ex1): Basic Matrix integration with CrewAI
+- [Ex1](./examples/ex1): Basic Matrix integration with CrewAI Agent using Gemini
 
 ## Configuration
 
@@ -105,16 +105,17 @@ Contributions are welcome! This is a community-driven project, and we appreciate
 ### Development Setup
 
 ```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
+pip install -r requirements.txt
 
 # Build the Rust backend in debug mode
 cargo build
+# Test that everything works properly, SSO opens browser, etc.
+cargo test
+
+./run.ps1 #(or crewai run in example dir) 
+
 ```
 
 ---
 
-Made with ❤️ by the community
+Made by 'turtle261'

@@ -172,27 +172,6 @@ crew = Crew(
 )
 ```
 
-### Custom Message Processing
-
-You can implement custom message processing by extending the MatrixTool class:
-
-```python
-from matrix_tool import MatrixTool
-
-class CustomMatrixTool(MatrixTool):
-    def process_message(self, message):
-        """Custom message processing logic."""
-        # Extract message content
-        sender = message.get("sender", "Unknown")
-        body = message.get("body", "")
-        
-        # Implement custom logic
-        if "help" in body.lower():
-            return self.send_message(message["room_id"], "How can I assist you?")
-        
-        # Default processing
-        return super().process_message(message)
-```
 
 ## Troubleshooting
 
@@ -274,11 +253,6 @@ To run the Rust tests:
 cargo test
 ```
 
-To run the Python tests:
-
-```bash
-pytest
-```
 
 ### Contributing
 
@@ -289,8 +263,6 @@ We welcome contributions to the Matrix Tool for CrewAI! Here are some areas wher
 - Enhancing documentation
 - Adding more examples
 - Performance optimizations
-
-Please see the [Contributing Guide](CONTRIBUTING.md) for more information on how to contribute.
 
 ### Project Roadmap
 
