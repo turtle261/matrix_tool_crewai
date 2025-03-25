@@ -49,10 +49,8 @@ print_colored "Copying .env file to examples/ex1" "yellow"
 mkdir -p examples/ex1
 cp .env examples/ex1/
 
-# Copy matrix_tool.py to the correct location - match exactly what run.ps1 does
 print_colored "Copying matrix_tool.py file to examples/ex1/src/ex1/tools/" "yellow"
-mkdir -p examples/ex1/src/ex1/tools/matrix_tool
-cp matrix_tool.py examples/ex1/src/ex1/tools/matrix_tool/
+cp matrix_tool.py examples/ex1/src/ex1/tools/matrix_tool/matrix_tool.py
 
 # Start the API server in the background
 print_colored "Starting Matrix API server..." "green"
