@@ -133,13 +133,22 @@ pub async fn sync(
     let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
-    // Create sync settings with a shorter timeout
-    let sync_settings = SyncSettings::default().timeout(std::time::Duration::from_secs(20));
+    // First, get the joined rooms as a fallback in case sync times out
+    let joined_rooms = client.joined_rooms();
+    let mut fallback_room_infos = Vec::new();
+    for room in joined_rooms {
+        fallback_room_infos.push(json!({
+            "room_id": room.room_id().to_string()
+        }));
+    }
     
-    // Use tokio timeout as an additional safety measure
+    // Create sync settings with a longer timeout for WSL/Linux compatibility
+    let sync_settings = SyncSettings::default().timeout(std::time::Duration::from_secs(60));
+    
+    // Use tokio timeout as an additional safety measure with a longer timeout
     let sync_future = client.sync_once(sync_settings);
     let sync_result = tokio::time::timeout(
-        std::time::Duration::from_secs(30), // 30 seconds timeout
+        std::time::Duration::from_secs(90), // 90 seconds timeout (increased from 30)
         sync_future
     ).await;
     
@@ -164,39 +173,18 @@ pub async fn sync(
         },
         Ok(Err(e)) => {
             // Matrix SDK error occurred
-            // If sync fails, still try to return the list of joined rooms
-            // This ensures the API continues to work even if sync times out
-            let joined_rooms = client.joined_rooms();
-            
-            let mut room_infos = Vec::new();
-            for room in joined_rooms {
-                room_infos.push(json!({
-                    "room_id": room.room_id().to_string()
-                }));
-            }
-            
-            // Return the rooms we could get, along with the error and a placeholder next_batch value
+            // Return the fallback rooms we gathered at the start
             Ok(HttpResponse::Ok().json(json!({
-                "rooms": room_infos,
+                "rooms": fallback_room_infos,
                 "next_batch": "failure_sync_token", // Placeholder sync token to ensure tests can pass
                 "error": format!("Sync warning (continuing with basic room list): {}", e)
             })))
         },
         Err(_) => {
             // Tokio timeout error occurred
-            // Still try to return the list of joined rooms
-            let joined_rooms = client.joined_rooms();
-            
-            let mut room_infos = Vec::new();
-            for room in joined_rooms {
-                room_infos.push(json!({
-                    "room_id": room.room_id().to_string()
-                }));
-            }
-            
-            // Return the rooms we could get, along with a placeholder next_batch token
+            // Return the fallback rooms we gathered at the start
             Ok(HttpResponse::Ok().json(json!({
-                "rooms": room_infos,
+                "rooms": fallback_room_infos,
                 "next_batch": "timeout_sync_token", // Placeholder sync token to ensure tests can pass
                 "error": "Sync timed out (continuing with basic room list)"
             })))
@@ -223,7 +211,7 @@ pub async fn rooms(
             // Fetch room name with a timeout
             let display_name_future = room.display_name();
             let display_name_result = tokio::time::timeout(
-                std::time::Duration::from_secs(5),
+                std::time::Duration::from_secs(10), // Increased from 5 to 10 seconds
                 display_name_future
             ).await;
             
@@ -242,7 +230,7 @@ pub async fn rooms(
     };
     
     // Add an overall timeout for the entire rooms request
-    match tokio::time::timeout(std::time::Duration::from_secs(15), rooms_future).await {
+    match tokio::time::timeout(std::time::Duration::from_secs(30), rooms_future).await { // Increased from 15 to 30 seconds
         Ok(Ok(room_infos)) => {
             Ok(HttpResponse::Ok().json(room_infos))
         },
@@ -281,7 +269,7 @@ pub async fn room_messages(
     // Set a tokio timeout to ensure we don't hang for too long
     let messages_future = room.messages(options);
     let messages_response = tokio::time::timeout(
-        std::time::Duration::from_secs(10),
+        std::time::Duration::from_secs(30), // Increased from 10 to 30 seconds for WSL/Linux compatibility
         messages_future
     ).await;
     

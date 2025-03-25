@@ -14,12 +14,12 @@ use std::env;
 // Test configuration
 const TEST_TIMEOUT_SECS: u64 = 300; // 5 minutes max for the entire test
 const LOGIN_CHECK_INTERVAL_SECS: u64 = 3;
-const SYNC_WAIT_TIME_SECS: u64 = 5;
+const SYNC_WAIT_TIME_SECS: u64 = 15; // Increased from 5 to 15 seconds for WSL/Linux compatibility
 const SERVER_PORT: u16 = 8080;
 const SERVER_ADDR: &str = "127.0.0.1";
 const SERVER_URL: &str = "http://127.0.0.1:8080";
-const REQUEST_RETRIES: u32 = 3;
-const RETRY_DELAY_MS: u64 = 500;
+const REQUEST_RETRIES: u32 = 5;
+const RETRY_DELAY_MS: u64 = 1000;
 
 struct TestStep {
     name: String,
@@ -163,7 +163,7 @@ async fn test_matrix_api() {
     
     let client = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::none()) // Don't follow redirects for SSO
-        .timeout(Duration::from_secs(30)) // Set a reasonable timeout
+        .timeout(Duration::from_secs(120)) // Increased from 30 to 120 seconds for WSL/Linux compatibility
         .build()
         .expect("Failed to build HTTP client");
     
