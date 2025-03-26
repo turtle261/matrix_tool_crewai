@@ -1,0 +1,23 @@
+[project]
+name = "moderator"
+version = "0.1.0"
+description = "Matrix chat room moderator using CrewAI"
+authors = [{ name = "Matrix Moderation Team", email = "example@example.com" }]
+requires-python = ">=3.10,<=3.13"
+dependencies = [
+    "crewai[tools]>=0.86.0,<1.0.0",
+    "pyyaml>=6.0",
+    "requests>=2.28.0",
+    "keyboard>=0.13.5"
+]
+
+[project.scripts]
+moderator = "moderator.main:run"
+run_crew = "moderator.main:run"
+train = "moderator.main:train"
+replay = "moderator.main:replay"
+test = "moderator.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build" 

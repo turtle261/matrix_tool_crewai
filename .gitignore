@@ -6,5 +6,11 @@ examples/ex1/.venv/
 examples/ex1/uv.lock
 examples/ex1/src/ex1/tools/matrixtool/__pycache__
 examples/ex1/src/ex1/__pycache__
+examples/moderator/.env
+examples/moderator/.venv/
+examples/moderator/uv.lock
+examples/moderator/src/moderator/tools/matrixtool/__pycache__
+examples/moderator/src/moderator/__pycache__
+examples/moderator/src/moderator/tools/__pycache__
 .env
 

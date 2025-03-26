@@ -103,7 +103,8 @@ Contributions are welcome! This is a community-driven project, and we appreciate
 5. Open a Pull Request
 
 ### Development Setup
-
+For debian: sudo apt install build-essential libssl-dev pkg-config libsqlite3-dev 
+For windows (using chocolatey): choco install sqlite3
 ```bash
 pip install -r requirements.txt
 
@@ -111,9 +112,7 @@ pip install -r requirements.txt
 cargo build
 # Test that everything works properly, SSO opens browser, etc.
 cargo test
-
-./run.ps1 #(or crewai run in example dir) 
-
+./run.sh # or ./run.ps1
 ```
 For reference: `run.ps1` will run the crewai example agent, which performs simple tasks on matrix. 
 `cargo test` will run the API backend tests, to ensure that the agent tool will not have backend issues. 

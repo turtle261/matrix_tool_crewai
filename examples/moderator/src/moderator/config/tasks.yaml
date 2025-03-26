@@ -1,0 +1,30 @@
+join_room_task:
+  description: >
+    Join the moderation target room with ID !iYYuXGoKsPtMPlJEub:mozilla.org.
+    Use the MatrixTool with task set to exactly "join_room !iYYuXGoKsPtMPlJEub:mozilla.org".
+  expected_output: >
+    A confirmation message indicating the room was joined successfully.
+  agent: moderator_agent
+
+monitor_room_task:
+  description: >
+    Continuously monitor the room for new messages and take appropriate moderation actions.
+    1. Use the MatrixTool with task "watch_room !iYYuXGoKsPtMPlJEub:mozilla.org 10" to watch for new messages with 10 polling attempts.
+    2. For each new message, evaluate if it violates PG-14 standards.
+    3. If a message violates the standards:
+       a. Use "redact_message !iYYuXGoKsPtMPlJEub:mozilla.org [event_id] Violates PG-14 standards"
+       b. Track the user who sent the message
+       c. If it's their second violation within an hour, send a warning
+       d. If it's their third violation within an hour, ban them
+    4. Continue monitoring indefinitely.
+    
+    Keep track of violations with the following information:
+    - User ID
+    - Violation time
+    - Violation count
+    
+    After redacting a second violation, send a warning message:
+    "One more illicit message within 1 hour will result in a ban."
+  expected_output: >
+    Ongoing moderation actions and status reports.
+  agent: moderator_agent 
