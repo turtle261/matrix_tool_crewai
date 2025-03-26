@@ -3,7 +3,7 @@
 
 # Configuration - Edit these variables as needed
 # Set PYTHON_VENV_PATH to your virtual environment path, or leave empty to use system Python
-PYTHON_VENV_PATH="../mo"
+PYTHON_VENV_PATH=""
 # Example: PYTHON_VENV_PATH="./venv"  # Relative path
 # Example: PYTHON_VENV_PATH="/home/user/myenv"  # Absolute path
 

@@ -8,8 +8,8 @@ from ex1.crew import Ex1
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file - explicitly specify UTF-8 encoding for Windows compatibility
+load_dotenv(encoding="utf-8")
 
 # Check for required API key
 def check_api_key():

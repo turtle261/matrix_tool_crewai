@@ -114,22 +114,6 @@ class ModeratorCrew():
         """
         Check if a message violates PG-14 standards using the LLM
         """
-        # First do a quick check for obvious violations
-        pg14_violations = [
-            # Words and phrases that violate PG-14 standards
-            "fuck", "shit", "asshole", "bitch", "dick", "pussy", "cunt",
-            "cock", "whore", "slut", "bastard", "motherfucker",
-            "explicit sex", "graphic violence", "nude", "pornography",
-            "kill yourself", "kys", "suicide instructions",
-            "how to make bombs", "how to make drugs"
-        ]
-        
-        message_lower = message.lower()
-        for violation in pg14_violations:
-            if violation in message_lower:
-                return True, f"Contains banned term: {violation}"
-        
-        # For more complex cases, use the LLM
         try:
             prompt = f"""
             Your task is to determine if the following message violates PG-14 standards.
@@ -145,10 +129,17 @@ class ModeratorCrew():
             - Detailed instructions for illegal activities
             - Strong profanity
             
+            Think carefully about context and nuance. Consider whether the message contains:
+            - Slurs or derogatory terms
+            - Threatening language
+            - Explicit descriptions of violence
+            - Sexual content inappropriate for teenagers
+            
             Respond with ONLY "YES" if it violates PG-14 standards, or "NO" if it doesn't.
             """
             
-            response = self.llm.generate(prompt).strip().upper()
+            # Use the correct method for CrewAI's LLM
+            response = self.llm.call(prompt).strip().upper()
             
             if "YES" in response:
                 return True, "LLM determined this violates PG-14 standards"
@@ -156,8 +147,18 @@ class ModeratorCrew():
             
         except Exception as e:
             print(f"Error using LLM for content moderation: {e}")
-            # Fall back to simple check in case of LLM error
-            return len([w for w in pg14_violations if w in message_lower]) > 0, "Using fallback method due to LLM error"
+            # Since we shouldn't use explicit fallbacks, return an error message
+            # but try one more time with a simpler prompt
+            try:
+                simple_prompt = f'Does this message "{message}" violate PG-14 standards? Answer YES or NO only.'
+                response = self.llm.call(simple_prompt).strip().upper()
+                if "YES" in response:
+                    return True, "Message likely violates PG-14 standards"
+                return False, "Message appears compliant with PG-14 standards"
+            except:
+                # Last resort - just log that we couldn't determine
+                print("Critical error: Unable to perform content moderation!")
+                return True, "Could not analyze content - flagging for human review"
     
     # Define the moderator agent
     @agent
