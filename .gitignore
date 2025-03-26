@@ -11,5 +11,6 @@ examples/moderator/.venv/
 examples/moderator/uv.lock
 examples/moderator/src/moderator/tools/matrixtool/__pycache__
 examples/moderator/src/moderator/__pycache__
+examples/moderator/src/moderator/tools/__pycache__
 .env
 
