@@ -1,7 +1,8 @@
 # Matrix Tool for CrewAI
 
-![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-green.svg)
+![Tests](https://img.shields.io/badge/build-passing-green.svg)
 
 A fully featured Matrix Chat tool allowing CrewAI agents (LLM agnostic) to send, receive messages, join and leave rooms, etc. as if they were a person using a client.
 

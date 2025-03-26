@@ -1,7 +1,8 @@
 [package]
 name = "matrix-api"
-version = "0.1.0"
-edition = "2021"
+version = "0.1.2"
+edition = "2025"
+authors = ["Turtle261"]
 license = "AGPL-3.0" # All associated files are under this AGPL-3.0 License.
 build = "build.rs"
 
