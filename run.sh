@@ -7,6 +7,9 @@ PYTHON_VENV_PATH="../mo"
 # Example: PYTHON_VENV_PATH="./venv"  # Relative path
 # Example: PYTHON_VENV_PATH="/home/user/myenv"  # Absolute path
 
+# Choose which example to run - ex1 for basic test, moderator for moderation agent
+EXAMPLE="moderator"  # Change to "moderator" to run the moderation example
+
 # Function to display colored text
 print_colored() {
   case "$2" in
@@ -30,8 +33,6 @@ if [ -n "$PYTHON_VENV_PATH" ]; then
   fi
 fi
 
-print_colored "Compiling Rust API Backend" "green"
-cargo build
 
 print_colored "Starting Matrix test..." "green"
 
@@ -44,13 +45,21 @@ if [ ! -f ".env" ]; then
   exit 1
 fi
 
-# Copy .env to the examples/ex1 directory
-print_colored "Copying .env file to examples/ex1" "yellow"
-mkdir -p examples/ex1
-cp .env examples/ex1/
+# Copy .env to the examples directory
+print_colored "Copying .env file to examples/$EXAMPLE" "yellow"
+mkdir -p "examples/$EXAMPLE"
+cp .env "examples/$EXAMPLE/"
 
-print_colored "Copying matrix_tool.py file to examples/ex1/src/ex1/tools/" "yellow"
-cp matrix_tool.py examples/ex1/src/ex1/tools/matrix_tool/matrix_tool.py
+# Copy matrix_tool.py file to the right location
+if [ "$EXAMPLE" = "ex1" ]; then
+  print_colored "Copying matrix_tool.py file to examples/ex1/src/ex1/tools/" "yellow"
+  mkdir -p examples/ex1/src/ex1/tools/matrix_tool
+  cp matrix_tool.py examples/ex1/src/ex1/tools/matrix_tool/matrix_tool.py
+elif [ "$EXAMPLE" = "moderator" ]; then
+  print_colored "Copying matrix_tool.py file to examples/moderator/src/moderator/tools/matrix_tool/" "yellow"
+  mkdir -p examples/moderator/src/moderator/tools/matrix_tool
+  cp matrix_tool.py examples/moderator/src/moderator/tools/matrix_tool/matrix_tool.py
+fi
 
 # Start the API server in the background
 print_colored "Starting Matrix API server..." "green"
@@ -104,9 +113,9 @@ if [ "$server_started" = false ]; then
   print_colored "The server might still be starting up. Will attempt to continue." "yellow"
 fi
 
-# Run the CrewAI example - simpler approach like in run.ps1
-print_colored "Running CrewAI Matrix example..." "green"
-cd examples/ex1
+# Run the CrewAI example
+print_colored "Running CrewAI $EXAMPLE example..." "green"
+cd "examples/$EXAMPLE"
 
 # Simple approach to run CrewAI
 if command -v crewai >/dev/null 2>&1; then
