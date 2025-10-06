@@ -28,7 +28,7 @@ class MatrixTool(BaseTool):
     - ban_user [room_id] [user_id] [reason]: Ban a user from a room
     """
     
-    base_url: str = "http://localhost:8080"
+    base_url: str = Field(default_factory=lambda: os.getenv("MATRIX_API_URL", "http://localhost:8080"))
     session_id: Optional[str] = None
     next_batch: Optional[str] = None
     task: Any = Field(
@@ -172,24 +172,32 @@ class MatrixTool(BaseTool):
         
         try:
             join_response = requests.post(
-                f"{self.base_url}/rooms/{self.session_id}/join/{room_id}"
+                f"{self.base_url}/rooms/{self.session_id}/{room_id}/join"
             )
-            
-            if join_response.status_code == 200:
-                return f"Successfully joined room {room_id}"
-            else:
-                result = join_response.json()
-                return f"Failed to join room: {result.get('error', 'Unknown error')}"
-        except Exception as e:
-            return f"Error joining room: {e}"
+            join_response.raise_for_status()
+            result = join_response.json()
+            return f"Successfully joined room {room_id}"
+        except requests.RequestException as e:
+            return f"Error joining room {room_id}: {e}"
+        except ValueError as e:
+            return f"Error parsing join response for room {room_id}: {e}"
     
     def leave_room(self, room_id: str) -> str:
         """Leave a specific Matrix room."""
-        self._login()
-        
-        # Note: The Matrix API backend doesn't currently support leaving rooms directly
-        # This is a placeholder for when that functionality is added
-        return f"Leave room functionality not implemented in the backend API. Cannot leave room {room_id} at this time."
+        if not self.session_id:
+            self._login()
+
+        try:
+            leave_response = requests.post(
+                f"{self.base_url}/rooms/{self.session_id}/{room_id}/leave"
+            )
+            leave_response.raise_for_status()
+            result = leave_response.json()
+            return f"Successfully left room {room_id}"
+        except requests.RequestException as e:
+            return f"Error leaving room {room_id}: {e}"
+        except ValueError as e:
+            return f"Error parsing leave response for room {room_id}: {e}"
     
     def get_messages(self, room_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Get messages from a specific room."""

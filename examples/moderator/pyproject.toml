@@ -2,7 +2,7 @@
 name = "moderator"
 version = "0.1.0"
 description = "Matrix chat room moderator using CrewAI"
-authors = [{ name = "Matrix Moderation Team", email = "example@example.com" }]
+authors = [{ name = "Matrix Moderation Team" }]
 requires-python = ">=3.10,<=3.13"
 dependencies = [
     "crewai[tools]>=0.86.0,<1.0.0",

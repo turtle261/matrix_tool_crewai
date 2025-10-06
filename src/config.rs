@@ -4,11 +4,18 @@ use std::fs;
 #[derive(Clone, Deserialize)]
 pub struct Config {
     pub homeserver: HomeserverConfig,
+    pub server: ServerConfig,
 }
 
 #[derive(Clone, Deserialize)]
 pub struct HomeserverConfig {
     pub url: String,
+}
+
+#[derive(Clone, Deserialize)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
 }
 
 impl Config {
