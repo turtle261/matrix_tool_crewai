@@ -91,11 +91,12 @@ pub async fn login_sso_callback(
     
     let mut sessions = state.sessions.write().await;
     
-    if !sessions.contains_key(session_id) {
-        return HttpResponse::BadRequest().body(format!("Invalid session ID: {}", session_id));
-    }
-    
-    let session = sessions.get_mut(session_id).unwrap();
+    let session = match sessions.get_mut(session_id) {
+        Some(session) => session,
+        None => {
+            return HttpResponse::BadRequest().body(format!("Invalid session ID: {}", session_id));
+        }
+    };
 
     if let Some(client) = session.client.as_ref() {
         match client.matrix_auth().login_token(login_token).await {
@@ -188,7 +189,7 @@ pub async fn sync(
             // Return the fallback rooms we gathered at the start
             Ok(HttpResponse::Ok().json(json!({
                 "rooms": fallback_room_infos,
-                "next_batch": "failure_sync_token", // Placeholder sync token to ensure tests can pass
+                "next_batch": "error_sync_token", // Consistent placeholder sync token
                 "error": format!("Sync warning (continuing with basic room list): {}", e)
             })))
         },
@@ -197,7 +198,7 @@ pub async fn sync(
             // Return the fallback rooms we gathered at the start
             Ok(HttpResponse::Ok().json(json!({
                 "rooms": fallback_room_infos,
-                "next_batch": "timeout_sync_token", // Placeholder sync token to ensure tests can pass
+                "next_batch": "error_sync_token", // Consistent placeholder sync token
                 "error": "Sync timed out (continuing with basic room list)"
             })))
         }
@@ -383,13 +384,13 @@ pub async fn send_message(
 
 // New endpoint to create a room
 pub async fn create_room(
-    state: web::Data<ApiState>, 
+    state: web::Data<ApiState>,
     path: web::Path<String>,
     body: web::Json<serde_json::Value>,
 ) -> Result<impl Responder, ApiError> {
     let session_id = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Prepare request with default room properties if none provided
@@ -434,7 +435,7 @@ pub async fn join_room(
 ) -> Result<impl Responder, ApiError> {
     let (session_id, room_id_str) = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Parse the room ID
@@ -471,7 +472,7 @@ pub async fn leave_room(
 ) -> Result<impl Responder, ApiError> {
     let (session_id, room_id_str) = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Parse the room ID
@@ -513,7 +514,7 @@ pub async fn redact_message(
 ) -> Result<impl Responder, ApiError> {
     let (session_id, room_id_str, event_id_str) = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Parse the room ID
@@ -563,7 +564,7 @@ pub async fn ban_user(
 ) -> Result<impl Responder, ApiError> {
     let (session_id, room_id_str, user_id_str) = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Parse the room ID
@@ -614,7 +615,7 @@ pub async fn watch_room(
 ) -> Result<impl Responder, ApiError> {
     let (session_id, room_id_str) = path.into_inner();
     let sessions = state.sessions.read().await;
-    let session = sessions.get(&session_id).ok_or(ApiError::SessionNotFound)?;
+    let session = sessions.get(&session_id).ok_or(ApiError::InvalidSession)?;
     let client = session.client.as_ref().ok_or(ApiError::NotLoggedIn)?;
     
     // Parse the room ID

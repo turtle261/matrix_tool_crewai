@@ -170,14 +170,18 @@ class MatrixTool(BaseTool):
         """Get messages from a specific room."""
         if not self.session_id:
             self._login()
-        
+
         try:
             messages_response = requests.get(
                 f"{self.base_url}/rooms/{self.session_id}/{room_id}/messages"
             )
+            messages_response.raise_for_status()  # Raise exception for bad status codes
             return messages_response.json()
-        except Exception as e:
+        except requests.RequestException as e:
             print(f"Error getting messages: {e}")
+            raise
+        except ValueError as e:
+            print(f"Error parsing messages JSON: {e}")
             raise
     
     def receive_messages(self, room_id: str) -> str:

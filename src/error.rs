@@ -10,8 +10,6 @@ pub enum ApiError {
     InvalidSession,
     #[error("Not logged in")]
     NotLoggedIn,
-    #[error("Session not found")]
-    SessionNotFound,
     #[error("Invalid room ID")]
     InvalidRoomId,
     #[error("Room not found")]
@@ -33,7 +31,6 @@ impl ResponseError for ApiError {
         let status_code = match self {
             ApiError::InvalidSession => actix_web::http::StatusCode::BAD_REQUEST,
             ApiError::NotLoggedIn => actix_web::http::StatusCode::UNAUTHORIZED,
-            ApiError::SessionNotFound => actix_web::http::StatusCode::NOT_FOUND,
             ApiError::InvalidRoomId => actix_web::http::StatusCode::BAD_REQUEST,
             ApiError::RoomNotFound => actix_web::http::StatusCode::NOT_FOUND,
             _ => actix_web::http::StatusCode::INTERNAL_SERVER_ERROR,
